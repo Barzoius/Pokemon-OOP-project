@@ -20,10 +20,11 @@ private:
     char* Name;
     int HP;
     float WEIGHT;
+    float CP;
 
 public:
 
-    POKEMON(char* N, int HP, float W) : HP(HP), WEIGHT(W)
+    POKEMON(char* N, int HP, float W, float CP) : HP(HP), WEIGHT(W), CP(CP)
     {
         Name = new char[strlen(N) + 1];
         strcpy(Name, N);
@@ -33,6 +34,17 @@ public:
     {
         if(Name == nullptr)
             delete[] Name;
+    }
+
+    POKEMON(const POKEMON& P) : HP(P.HP), WEIGHT(P.WEIGHT), CP(P.CP) {
+        Name = new char[strlen(P.Name) + 1];
+        strcpy(Name, P.Name);
+    }
+
+    void SETCP(float cp){ CP = cp; };
+
+    float getCP() const {
+        return CP;
     }
 
     std::ostream& print(std::ostream&) const override;
@@ -49,7 +61,7 @@ std::ostream& POKEMON::print(std::ostream& out) const {
     out<<"STATS: " << std::endl;
     out<<"-HP = " << this->HP << std::endl;
     out<<"-WEIGHT = " << this->WEIGHT << std::endl;
-
+    out<<"-CP = " << this ->CP << std::endl;
     return out;
 }
 
@@ -65,6 +77,8 @@ std::istream& POKEMON::read(std::istream& in){
     in >> this -> HP;
     std::cout<<"Insert the weight of the pokemon: "<<std::endl;
     in >> this -> WEIGHT;
+    std::cout<<"Insert the Combat Power(CP) of your pokemon: " << std::endl;
+    in >> this -> CP;
 
     return in;
 }
@@ -73,18 +87,41 @@ std::istream& operator >> (std::istream& in, POKEMON& P){
     return P.read(in);
 }
 
-template <class type>
 class WATER_TYPE : virtual public POKEMON{
 
 private:
 
     Water_Species WS;
-    type TYPE;
 
 public:
-    WATER_TYPE(char* N, int HP, float W, type  T) : POKEMON(N, HP, W), TYPE(std::move(T)){ std::cout<<"WATHA."<<std::endl;}
+    WATER_TYPE(char* N, int HP, float W, float CP, Water_Species Wt) : POKEMON(N, HP, W, CP), WS(Wt){ std::cout<<"WATHA."<<std::endl;}
+
+    WATER_TYPE(const WATER_TYPE& W) : POKEMON(W){}
+
+    Water_Species getSpecies() const {
+        return WS;
+    };
+
+    void operator + (WATER_TYPE& other)  {
+
+        if(this -> WS == other.WS) {
+            float W1 = this->getCP();
+            float AddedCP = other.getCP() + W1;
+            if (AddedCP >= 1500) {
+                this->SETCP(1500);
+                other.SETCP(AddedCP - 1500);
+            } else {
+                this->SETCP(AddedCP);
+                other.SETCP(0);
+            }
+        } else std::cout<<"IUCANT";
+    }
 
 };
+
+
+
+
 
 class STEEL_TYPE : virtual public POKEMON{
 
