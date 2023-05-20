@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <vector>
 
 ///-------------------------------(ENUMS)-------------------------------///
 enum class Water_Species {Squirtle, Blastoise, Seel, Horsea, Vaporeon};
