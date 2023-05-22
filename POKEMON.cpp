@@ -7,6 +7,8 @@ enum class Water_Species {Squirtle, Blastoise, Seel, Horsea, Vaporeon};
 enum class Fire_Species { Charmander, Magmar, Tepig, Litten, Raboot};
 enum class Steel_Species { Klink, Klang, Meltan, Melmetal};
 enum class Electric_Species { Pikachu,  Raichu,  Manectric, Electivire};
+
+enum class Water_Steel_Species {Empoleon};
 ///---------------------------------------------------------------------///
 
 template <class P>
