@@ -220,17 +220,23 @@ public:
 
     void operator + (WATER_TYPE& other)  {
 
-        if(this -> WS == other.WS) {
-            float W1 = this->getCP();
-            float AddedCP = other.getCP() + W1;
-            if (AddedCP >= 1500) {
-                this->SETCP(1500);
-                other.SETCP(AddedCP - 1500);
+        try {
+            if (this->WS == other.WS) {
+                float W1 = this->getCP();
+                float AddedCP = other.getCP() + W1;
+                if (AddedCP >= 1500) {
+                    this->SETCP(1500);
+                    other.SETCP(AddedCP - 1500);
+                } else {
+                    this->SETCP(AddedCP);
+                    other.SETCP(0);
+                }
             } else {
-                this->SETCP(AddedCP);
-                other.SETCP(0);
+                throw std::runtime_error("Invalid operation: Cannot add Pokemon of different water species.");
             }
-        } else std::cout<<"IUCANT"<<std::endl;
+        } catch (const std::exception& e) {
+            std::cout << "Error: " << e.what() << std::endl;
+        }
     }
 
     static std::string WaterSpeciesToString(Water_Species species) {
@@ -249,7 +255,6 @@ public:
             return "Unknown";
     }
 }
-
 
     std::istream& read(std::istream& in) override;
     std::ostream& print(std::ostream& out) const override;
@@ -528,28 +533,35 @@ public:
 
     WATER_STEEL_TYPE(){}
 
-    WATER_STEEL_TYPE(char* N, int HP, float W, float CP, Water_Species WS, Steel_Species SS) :
+    WATER_STEEL_TYPE(char* N, int HP, float W, float CP, Water_Steel_Species WSS) :
             POKEMON(N, HP, W, CP),
-            WATER_TYPE(N, HP, W, CP, WS),
-            STEEL_TYPE(N, HP, W, CP, SS),
-            WSS(Water_Steel_Species::Empoleon){}
+//            WATER_TYPE(N, HP, W, CP, WS),
+//            STEEL_TYPE(N, HP, W, CP, SS),
+            WSS(WSS){}
+
+    WATER_STEEL_TYPE(char* N, int HP, float W, float CP) :
+            POKEMON(N, HP, W, CP)
+//            WATER_TYPE(N, HP, W, CP, WS),
+//            STEEL_TYPE(N, HP, W, CP, SS),
+{}
+
 
     std::string getSpecString() const {return WaterSteelSpecies;}
     Water_Steel_Species getSpecSpec() const { return WSS;}
     void SetSpecSpec(Water_Steel_Species S) { WSS = S;}
-
+    void SetSpecString(std::string s) { WaterSteelSpecies = s;}
 
     WATER_STEEL_TYPE(char* N, WATER_TYPE& W, STEEL_TYPE&S) :
         POKEMON(N, W.getHP() + S.getHP(), W.getW() + S.getW(), 100),
         WATER_TYPE(N, W.getHP() + S.getHP(), W.getW() + S.getW(), 100, W.getSpecies()),
         STEEL_TYPE(N, W.getHP() + S.getHP(), W.getW() + S.getW(), 100, S.getSpecies())
     {
-                std::string waterString = WaterSpeciesToString(W.getSpecies());
+        std::string waterString = WaterSpeciesToString(W.getSpecies());
         std::string steelString = SteelSpeciesToString(S.getSpecies());
-        WaterSteelSpecies = waterString.substr(0, waterString.size() / 2) +
-                                      steelString.substr(steelString.size() / 2);
+        SetSpecString(waterString.substr(0, waterString.size() / 2) +
+                                      steelString.substr(steelString.size() / 2));
 
-        WSS = Water_Steel_Species::ew;
+          //WSS = Water_Steel_Species::ew;
     }
 
     WATER_STEEL_TYPE(const WATER_STEEL_TYPE& WS) : POKEMON(WS), WSS(WS.WSS){}
@@ -624,8 +636,11 @@ std::ostream& WATER_STEEL_TYPE::print(std::ostream& out) const{
     if (WSS == Water_Steel_Species::Empoleon) {
         out << "Empoleon";
     } else {
-        out << WaterSteelSpecies;
+//        out << getSpecString();
+        out<<"Trebuie sa vad care e faza :D.";
+        out<<std::endl;
     }
+
     out<<std::endl;
     return out;
 }
@@ -639,31 +654,23 @@ std::ostream& operator << (std::ostream& out, const WATER_STEEL_TYPE& WS){
 //class FIRE_TYPE{};
 //class ELECTRIC_TYPE{};
 //class FIRE_ELECTRIC_TYPE : public FIRE_TYPE, public ELECTRIC_TYPE{};
-//
-//template<typename Type1, typename Type2>
-//class MORF : public WATER_STEEL_TYPE /* public FIRE_ELECTRIC_TYPE*/{
-//private:
+
+template<typename Type3 ,typename Type1, typename Type2>
+class MORF : public WATER_STEEL_TYPE /* public FIRE_ELECTRIC_TYPE*/{
+private:
 //    POKEMON* pokemon_;
 //    WATER_STEEL_TYPE* WST;
-//public:
-//    MORF(char* name, Type1& type1, Type2& type2)
-//            : WATER_STEEL_TYPE(name, static_cast<WATER_TYPE&>(type1), static_cast<STEEL_TYPE&>(type2)) {}
-//
-////    // Specialization for FIRE_TYPE and ELECTRIC_TYPE
-////    MORF(char* name, const FIRE_TYPE& type1, const ELECTRIC_TYPE& type2)
-////            : FIRE_ELECTRIC_TYPE(name, type1, type2) {}
-//
-//    friend std::istream& operator>>(std::istream& in, MORF& M){
-//        in>>(WATER_STEEL_TYPE&)M;
-//        return in;
-//    }
-//
-//    friend std::ostream& operator <<(std::ostream& out,const MORF& M)  {
-//        out<<(WATER_STEEL_TYPE&)M;
-//        return out;
-//    }
-//
-//};
+public:
+    MORF(char* name, Type1& type1, Type2& type2){
+             Type3 MM(name, static_cast<Type1&>(type1).getHP() + static_cast<Type2&>(type2).getHP(), static_cast<Type2&>(type2).getW(), 10) ;
+             std::cout<<MM;
+    }
+
+//    MORF(char* name, const FIRE_TYPE& type1, const ELECTRIC_TYPE& type2)
+//            : FIRE_ELECTRIC_TYPE(name, type1, type2) {}
+
+
+};
 
 struct PokemonComparator {
     bool operator()(const POKEMON* p1, const POKEMON* p2) const {
@@ -730,6 +737,13 @@ public:
         }
         return emptySet;
     }
+
+//    void clearPokedexSets() {
+//        for (auto& entry : PDEX) {
+//            entry.second.clear();
+//        }
+//        std::cout << "CCC." << std::endl;
+//    }
 };
 
 class BAG {
@@ -741,12 +755,9 @@ public:
     }
 
     void addPokedex(const POKEDEX& pokedex) {
-        if (bag.size() < 2) {
             bag.push_back(pokedex);
             std::cout << "Added Pokedex to the Bag." << std::endl;
-        } else {
-            std::cout << "Bag is already full. Cannot add another Pokedex." << std::endl;
-        }
+
     }
 
     void printBag() {
@@ -757,14 +768,19 @@ public:
         for (POKEDEX& pokedex : bag) {
             std::cout << "|-----------------"<<"("<<cnt<<")"<<"-----------------|" << std::endl;
             pokedex.printPokedex();
-            cnt++;
+
         }
+
     }
 
     const std::vector<POKEDEX>& getPokedexList() const {
         return bag;
     }
 
+    void clearPokedexList() {
+        bag.clear();
+        std::cout << "Cleared the  Bag." << std::endl;
+    }
 
 };
 
@@ -781,9 +797,6 @@ public:
             std::cout << "Failed to open file for writing." << std::endl;
             return;
         }
-
-//        bag.printBag(); // Print pokedexes to console
-//        fout << "POKEDEXES:\n";
 
         for (const auto& pokedex : bag.getPokedexList()) {
             std::string line = "--------------------\n";
@@ -803,11 +816,6 @@ public:
                     fout << "HP: " << hp << std::endl;
                     fout << "Weight: " << weight << std::endl;
                     fout << "CP: " << cp << std::endl;
-//
-//                    fout.write(name.c_str(), name.size());
-//                    fout.write(reinterpret_cast<const char*>(&hp), sizeof(hp));
-//                    fout.write(reinterpret_cast<const char*>(&weight), sizeof(weight));
-//                    fout.write(reinterpret_cast<const char*>(&cp), sizeof(cp));
 
 
                 }
@@ -820,12 +828,9 @@ public:
                     const std::string& name = steelType->getName();
                     int hp = steelType->getHP();
                     double weight = steelType->getW();
-                    int cp = steelType->getCP();
+                    float cp = steelType->getCP();
 
-//                    fout.write(name.c_str(), name.size());
-//                    fout.write(reinterpret_cast<const char*>(&hp), sizeof(hp));
-//                    fout.write(reinterpret_cast<const char*>(&weight), sizeof(weight));
-//                    fout.write(reinterpret_cast<const char*>(&cp), sizeof(cp));
+
                     fout << "Name: " << name << std::endl;
                     fout << "HP: " << hp << std::endl;
                     fout << "Weight: " << weight << std::endl;
@@ -843,10 +848,6 @@ public:
                     double weight = waterSteelType->getW();
                     int cp = waterSteelType->getCP();
 
-//                    fout.write(name.c_str(), name.size());
-//                    fout.write(reinterpret_cast<const char*>(&hp), sizeof(hp));
-//                    fout.write(reinterpret_cast<const char*>(&weight), sizeof(weight));
-//                    fout.write(reinterpret_cast<const char*>(&cp), sizeof(cp));
                     fout << "Name: " << name << std::endl;
                     fout << "HP: " << hp << std::endl;
                     fout << "Weight: " << weight << std::endl;
@@ -858,27 +859,10 @@ public:
         }
 
         fout.close();
+        bag.clearPokedexList(); ///!!
+        std::cout << "The bag has been emptied." << std::endl;
     }
 
-//    void printPokedexesToConsole() {
-//        std::ifstream fin("casa.bin", std::ios::binary);
-//
-//        if (!fin) {
-//            std::cout << "Failed to open file for reading." << std::endl;
-//            return;
-//        }
-//
-//        char buffer[100]; // Adjust the buffer size based on your data structure
-//        while (fin.read(buffer, sizeof(buffer))) {
-//            std::cout.write(buffer, fin.gcount());
-//        }
-//
-//        if (fin.gcount() > 0) {
-//            std::cout.write(buffer, fin.gcount());
-//        }
-//
-//        fin.close();
-//    }
     void printPokedexesToConsole() {
         std::ifstream fin("casa.bin", std::ios::binary);
 
@@ -895,10 +879,10 @@ public:
         fin.close();
     }
 
-////    void emptyBag() {
-////        bag.clearPokedexList(); ///!!
-////        std::cout << "The bag has been emptied." << std::endl;
-////    }
+//    void emptyBag() {
+//        bag.clearPokedexList(); ///!!
+//        std::cout << "The bag has been emptied." << std::endl;
+//    }
 };
 
 class PokePhone{
@@ -910,6 +894,7 @@ private:
     PokePhone()=default;
     PokePhone(const PokePhone&)=delete;
     static int nrOfInstance;
+    PokePhone& operator =(PokePhone&) = delete;
 
 public:
     int a = 1;
@@ -999,6 +984,7 @@ public:
                 }
 
                 case 3:{
+//                    pokedex1.printPokedex();
                     bag.addPokedex(pokedex1);
                     bag.printBag();
                     break;
@@ -1016,6 +1002,21 @@ public:
                     break;
                 }
 
+                case 7:{
+                    std::cout<<"Insert a WaterType pokemon: ";
+                    WATER_TYPE A;
+                    std::cin >> A;
+                    std::cout<<std::endl;
+                    std::cout<<"Insert a WaterType pokemon: ";
+                    STEEL_TYPE B;
+                    std::cin >> B;
+                    std::cout<<std::endl;
+                    std::cout<<"Now please insert the name of your pokemon: ";
+                    char* name = new char[100];
+                    std::cin>>name;
+                    std::cout<<std::endl;
+                    MORF<WATER_STEEL_TYPE, WATER_TYPE, STEEL_TYPE> COR(name, A, B);
+                }
                 case 6:{
                     k = 0;
                     break;
@@ -1055,18 +1056,24 @@ int main() {
 
     PokePhone* b=b->getInstance();
     b->OpenPPhone();
+
+//    WATER_TYPE A("DAN", 2312, 23.2, 3221, Water_Species::Vaporeon);
+//    STEEL_TYPE B("KORI", 12, 123, 213,  Steel_Species::Melmetal);
+//    MORF<WATER_STEEL_TYPE, WATER_TYPE, STEEL_TYPE> COR("DANEE", A, B);
+
+//
 //    std::ofstream file("casa.bin", std::ios::binary | std::ios::trunc);
 //    if (file) {
-//        // File opened successfully
-//        // The file is now empty
-//        std::cout << "File cleared successfully." << std::endl;
+
+//        std::cout << "Wipe Cleaned" << std::endl;
 //    } else {
-//        std::cout << "Failed to open file." << std::endl;
+//        std::cout << " -_-" << std::endl;
 //    }
 
-    return 0;
-
-
+//    WATER_TYPE W("DAN", 13, 32112, 321, Water_Species::Vaporeon);
+//    WATER_TYPE Q("CORI", 123, 32121, 12, Water_Species::Squirtle);
+//    W+Q;
+//    return 0;
 
 }
 
