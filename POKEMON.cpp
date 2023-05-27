@@ -561,7 +561,7 @@ public:
         SetSpecString(waterString.substr(0, waterString.size() / 2) +
                                       steelString.substr(steelString.size() / 2));
 
-          //WSS = Water_Steel_Species::ew;
+        
     }
 
     WATER_STEEL_TYPE(const WATER_STEEL_TYPE& WS) : POKEMON(WS), WSS(WS.WSS){}
